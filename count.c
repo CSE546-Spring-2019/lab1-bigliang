@@ -12,8 +12,8 @@ int main(int argc, char *argv[])
         printf("Too many parameters! Please provide three parameters");
         exit(1);
     }
-    FILE *inputFile;
-    FILE *outputFile;
+    FILE *inputFile; // File to Search
+    FILE *outputFile; // File to write output
     if ((inputFile = fopen(argv[1],"rb")) == NULL) {
         printf("Can't open file %s \n", argv[1]);
         printf("The program will exit, please rerun it with correct input file name \n");
@@ -25,22 +25,23 @@ int main(int argc, char *argv[])
         return 0;
     }
 
-    int len = (int)strlen(argv[2]);
+    int len = (int)strlen(argv[2]); // the length of the search string
     char *searchString = malloc(len);
     stpcpy(searchString,argv[2]);
     if (len > 20) {
         printf("The search string must less than 20 byte \n");
         exit(1);
     }
-    int size = 0;
-    int numbers = 0;
+    long size = 0; // size of the file
+    long numbers = 0;
     char *readString = malloc(100);
-    fseek (inputFile, 0, SEEK_SET);
-    int readSize = (int)fread(readString,1,100,inputFile);
-    size = readSize;
+    fseek (inputFile, 0, SEEK_SET); // put the pointer on the top of the file
+    int readSize = (int)fread(readString,1,100,inputFile); // the number of byte for each time
+    size = (long)readSize;
+   
     while (readSize >= len) {
         for (int i = 0; i < readSize && readSize - i >= len; i++) {
-            if (readString[i] == (searchString[0] & 0xff)) {
+            if (readString[i] == (searchString[0] & 0xff)) { // if match the first chracter then scan
                 int matched = 1;
                 for (int j = 0; j < len; j++) {
                     if (readString[i+j] != (searchString[j]& 0xff) ) {
@@ -52,17 +53,21 @@ int main(int argc, char *argv[])
             }
         }
         if (readSize < 100) break;
-        int moved = -len + 1;
+        int moved = -len + 1; // we move backward the pointers of the Search file
         fseek(inputFile,moved,SEEK_CUR);
         readSize = (int)fread(readString,1,100,inputFile);
+        
     }
-    size = (int)ftell(inputFile);
+    fseek(inputFile, 0, SEEK_END);
+    size = (long)ftell(inputFile);
+    
     fclose(inputFile);
     fseek (outputFile, 0, SEEK_SET);
-    fprintf(outputFile,"Size of file is %d \n",size);
-    printf("Size of file is %d \n",size);
-    fprintf(outputFile, "number of the matches = %d \n", numbers);
-    printf("number of the matches = %d \n", numbers);
+    fprintf(outputFile,"Size of file is %ld \n",size);
+    printf("Size of file is %ld \n",size);
+    fprintf(outputFile, "number of the matches = %ld \n", numbers);
+    printf("number of the matches = %ld \n", numbers);
+   
     fclose(outputFile);
     return 0;
 }
